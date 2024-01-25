@@ -1,7 +1,7 @@
 // Register.js
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { registerUser } from "c:/Users/STEPHIE/mobapp/Mobile1/src/screens/redux/store";
+import { registerUser } from "../redux/store";
 import { View, Text, StyleSheet, Image, useWindowDimensions } from "react-native";
 import Input from "../../components/Inputs/Input";
 import Button from "../../components/Buttons/Button";
@@ -117,4 +117,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connect((state) => ({ registeredUsers: state.registeredUsers }))(LogIn);
+export default connect((state) => ({ registeredUsers: state.registeredUsers }))(Register);

@@ -1,7 +1,7 @@
 // Register.js
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { registerUser } from "c:/Users/STEPHIE/mobapp/Mobile1/src/screens/redux/store";
+import { registerUser } from "../redux/store"
 import { View, Text, StyleSheet, Image, useWindowDimensions } from "react-native";
 import Input from "../../components/Inputs/Input";
 import Button from "../../components/Buttons/Button";
