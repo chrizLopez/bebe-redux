@@ -1,100 +1,77 @@
-// LogIn.js
-
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  useWindowDimensions,
-  TouchableOpacity,
-} from "react-native";
+// Register.js
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
+import { registerUser } from "c:/Users/STEPHIE/mobapp/Mobile1/src/screens/redux/store";
+import { View, Text, StyleSheet, Image, useWindowDimensions } from "react-native";
 import Input from "../../components/Inputs/Input";
 import Button from "../../components/Buttons/Button";
 import Logo from "../../../assets/images/logo.jpg";
 import { useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
 
-const LogIn = ({ registeredUsers, setRegisteredUsers }) => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
+const Register = ({ dispatch, registeredUsers }) => {
   const { height } = useWindowDimensions();
   const navigation = useNavigation();
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const { control, handleSubmit, watch } = useForm();
 
-  const onLoginPress = async (data) => {
-    console.log("Login form data:", data);
+  const pass = watch("password");
+  const [newUser, setNewUser] = useState(null);
 
-    const { username, password } = data;
-
-    const user = registeredUsers.find(
-      (user) => user.username === username && user.password === password
-    );
-
-    if (user) {
-      setError("");
-      navigation.navigate("Home");
-    } else {
-      setError("Wrong email and password.");
+  useEffect(() => {
+    if (newUser) {
+      dispatch(registerUser(newUser));
     }
+  }, [dispatch, newUser]);
+
+  const onBackToLogin = () => {
+    navigation.navigate("Login");
   };
 
-  const onForgotPasswordPressed = () => {
-    // Define the function logic here if needed
-  };
+  const onRegisterPressed = async (data) => {
+    const { username, password, firstName, lastName, confirmPassword } = data;
+    const newUser = { username, password, firstName, lastName };
+    setNewUser(newUser);
 
-  const onDontHaveAccountPressed = () => {
-    navigation.navigate("Register");
+    try {
+      await AsyncStorage.setItem("registeredUsers", JSON.stringify([...registeredUsers, newUser]));
+      console.log("User registered and saved to AsyncStorage:", newUser);
+    } catch (error) {
+      console.error("Error saving registered user:", error);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Image
-        style={[styles.logo, { height: height * 0.2 }]}
+        style={[styles.logo, { height: height * 0.1 }]}
         source={Logo}
         resizeMode="contain"
       />
-      <Text style={styles.title}>ACCOUNT LOG IN</Text>
+
+      <Text style={styles.title}>Sign Up</Text>
 
       <Input
-        name="username"
-        placeholder="Email"
+        name="firstName"
+        placeholder="First Name"
         control={control}
-        rules={{ required: "Username is required" }}
-      />
-      <Input
-        name="password"
-        placeholder="Password"
-        control={control}
-        secureTextEntry={!showPassword}
         rules={{
-          required: "Password is required",
-          minLength: {
-            value: 8,
-            message: "Password should be at least 8 characters long",
-          },
+          required: "The First Name is required",
         }}
       />
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {/* ... other input components ... */}
 
-      <Button text="Log In" type="PRIMARY" onPress={handleSubmit(onLoginPress)} />
       <Button
-        text="Forgot Password?"
-        type="TERTIARY"
-        onPress={onForgotPasswordPressed}
+        text="Register"
+        type="PRIMARY"
+        onPress={handleSubmit(onRegisterPressed)}
       />
+
       <Text>
-        <Text style={styles.word}>Don't have an account yet?{" "}</Text>
-        <Text style={styles.underlineText} onPress={onDontHaveAccountPressed}>
-          Create one.
+        <Text style={styles.word}>Already have an account?{" "}</Text>
+        <Text style={styles.underlineText} onPress={onBackToLogin}>
+          Log in here.
         </Text>
       </Text>
     </View>
@@ -140,4 +117,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LogIn;
+export default connect((state) => ({ registeredUsers: state.registeredUsers }))(LogIn);

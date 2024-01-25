@@ -1,6 +1,6 @@
-// App.js
-
 import React, { useState, useEffect } from "react";
+import { Provider } from "react-redux";
+import store from "./src/screens/redux/store";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -30,38 +30,14 @@ export default function App() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen
-          name="Login"
-          options={{ title: "Log In" }}
-        >
-          {(props) => (
-            <LogIn
-              {...props}
-              registeredUsers={registeredUsers}
-              setRegisteredUsers={setRegisteredUsers}
-            />
-          )}
-        </Stack.Screen>
-        <Stack.Screen
-          name="Register"
-          options={{ title: "Register" }}
-        >
-          {(props) => (
-            <Register
-              {...props}
-              registeredUsers={registeredUsers}
-              setRegisteredUsers={setRegisteredUsers}
-            />
-          )}
-        </Stack.Screen>
-        <Stack.Screen
-          name="Home"
-          component={Home}
-          options={{ title: "Home" }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen name="Login" options={{ title: "Log In" }} component={LogIn} />
+          <Stack.Screen name="Register" options={{ title: "Register" }} component={Register} />
+          <Stack.Screen name="Home" component={Home} options={{ title: "Home" }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }

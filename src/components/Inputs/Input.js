@@ -1,5 +1,3 @@
-// Input.js
-
 import React, { useState } from "react";
 import { TextInput, View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";

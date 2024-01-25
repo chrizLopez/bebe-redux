@@ -1,30 +1,24 @@
-// Home.js
-
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Modal } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ScrollView, TextInput, Modal } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Logo from '../../../assets/images/logo.jpg';
 
 const Home = () => {
   const navigation = useNavigation();
   const [isSettingsModalVisible, setSettingsModalVisible] = useState(false);
-
-  const onPressSignOut = () => {
-    navigation.navigate('Login');
-  };
-
-  const albumsData = [
-    { id: '1', title: 'Album 1', artist: 'Artist A' },
-    { id: '2', title: 'Album 2', artist: 'Artist B' },
-    // Add more album items here
-  ];
-
-  const playlistsData = [
-    { id: '1', title: 'Playlist 1', description: 'Description for Playlist 1' },
-    { id: '2', title: 'Playlist 2', description: 'Description for Playlist 2' },
-    // Add more playlist items here
-  ];
+  const [task, setTask] = useState('');
+  const [tasks, setTasks] = useState([
+    {
+      id: '01',
+      title: 'Planting',
+    },
+    {
+      id: '02',
+      title: 'Shopping',
+    },
+  ]);
+  const [editTaskId, setEditTaskId] = useState(null);
 
   const settingsOptions = [
     { id: '1', title: 'Personal Information' },
@@ -33,51 +27,125 @@ const Home = () => {
     { id: '4', title: 'Logout' },
   ];
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.settingsItem} onPress={() => handleSettingsItemClick(item)}>
-      <Text style={styles.settingsItemText}>{item.title}</Text>
-    </TouchableOpacity>
+  const onPressSignOut = () => {
+    navigation.navigate('Login');
+  };
+
+  const renderTask = ({ item }) => (
+    <View style={styles.taskItem}>
+      <TextInput
+        style={styles.taskTitle}
+        value={editTaskId === item.id ? task : item.title}
+        editable={editTaskId === item.id}
+        onChangeText={(text) => setTask(text)}
+      />
+      {editTaskId === item.id ? (
+        <TouchableOpacity onPress={handleSaveEdit}>
+          <Ionicons name="save" size={20} color="white" />
+        </TouchableOpacity>
+      ) : (
+        <>
+          <TouchableOpacity onPress={() => handleEditTask(item)}>
+            <Ionicons name="create" size={20} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
+            <Ionicons name="trash" size={20} color="white" />
+          </TouchableOpacity>
+        </>
+      )}
+    </View>
   );
 
   const handleSettingsItemClick = (item) => {
-    // Handle different settings options here
     if (item.id === '4') {
-      // Logout logic
       navigation.navigate('Login');
     } else {
-      // Handle other options accordingly
       console.log('Selected setting:', item.title);
     }
 
-    // Close the settings modal
     setSettingsModalVisible(false);
+  };
+
+  const handleAddTask = () => {
+    if (task.trim() !== '') {
+      const newTask = {
+        id: (tasks.length + 1).toString(),
+        title: task,
+      };
+
+      setTasks([newTask, ...tasks]);
+      setTask('');
+    }
+  };
+
+  const handleEditTask = (selectedTask) => {
+    setEditTaskId(selectedTask.id);
+    setTask(selectedTask.title);
+  };
+
+  const handleSaveEdit = () => {
+    if (editTaskId) {
+      const updatedTasks = tasks.map((t) =>
+        t.id === editTaskId ? { ...t, title: task } : t
+      );
+
+      setTasks(updatedTasks);
+      setEditTaskId(null);
+      setTask('');
+    }
+  };
+
+  const handleDeleteTask = (taskId) => {
+    const updatedTasks = tasks.filter((task) => task.id !== taskId);
+    setTasks(updatedTasks);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image style={styles.logo} source={Logo} resizeMode="contain" />
+        <View style={styles.logoContainer}>
+          <Image style={styles.logo} source={Logo} resizeMode="contain" />
+          <Text style={styles.logoText}>TO-DO-LIST</Text>
+        </View>
         <TouchableOpacity onPress={() => setSettingsModalVisible(true)}>
-          <Ionicons name="settings" size={24} color="white" />
+          <MaterialCommunityIcons name="menu" size={24} color="white" />
         </TouchableOpacity>
       </View>
-      <Text style={styles.title}>Featured Playlists</Text>
-      <View style={styles.albums}>
-        <Text style={styles.sectionTitle}>Albums</Text>
-        <FlatList
-          data={albumsData}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-        />
-      </View>
-      <View style={styles.playlists}>
-        <Text style={styles.sectionTitle}>Playlists</Text>
-        <FlatList
-          data={playlistsData}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-        />
-      </View>
+
+      <ScrollView style={{ flexGrow: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={{ marginHorizontal: 16, flex: 1, marginTop: 10 }}>
+          <FlatList data={tasks} renderItem={renderTask} keyExtractor={(item) => item.id} />
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, marginTop: 10 }}>
+            <TextInput
+              style={{
+                flex: 1,
+                borderWidth: 2,
+                backgroundColor: '#FFFFFF',
+                borderRadius: 6,
+                paddingVertical: 6,
+                paddingHorizontal: 16,
+                marginRight: 12,
+              }}
+              placeholder="Add a Task"
+              value={task}
+              onChangeText={(text) => setTask(text)}
+            />
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: 6,
+                paddingHorizontal: 12,
+                paddingVertical: 12,
+              }}
+              onPress={handleAddTask}
+            >
+              <Text style={{ fontWeight: 'bold', fontSize: 20 }}>Add</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -88,33 +156,17 @@ const Home = () => {
           <FlatList
             data={settingsOptions}
             keyExtractor={(item) => item.id}
-            renderItem={renderItem}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.settingsItem}
+                onPress={() => handleSettingsItemClick(item)}
+              >
+                <Text style={styles.settingsItemText}>{item.title}</Text>
+              </TouchableOpacity>
+            )}
           />
         </View>
       </Modal>
-      <View style={styles.bottomNavigation}>
-        <TouchableOpacity
-          style={styles.bottomNavItem}
-          onPress={() => navigation.navigate('Home')}
-        >
-          <Ionicons name="home" size={24} color="white" />
-          <Text style={styles.bottomNavText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.bottomNavItem}
-          onPress={() => navigation.navigate('Search')}
-        >
-          <Ionicons name="search" size={24} color="white" />
-          <Text style={styles.bottomNavText}>Search</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.bottomNavItem}
-          onPress={() => navigation.navigate('Profile')}
-        >
-          <Ionicons name="person" size={24} color="white" />
-          <Text style={styles.bottomNavText}>Profile</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
@@ -129,28 +181,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 16,
   },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: 'white',
-    marginTop: 20,
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 60,
+    height: 60,
+    marginRight: 8,
   },
-  albums: {
-    marginTop: 20,
-  },
-  playlists: {
-    marginTop: 20,
-  },
-  sectionTitle: {
+  logoText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 10,
   },
   settingsModal: {
     flex: 1,
@@ -167,46 +213,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'white',
   },
-  item: {
+  taskItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#282828',
     padding: 16,
     marginBottom: 8,
     borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
-  itemLogo: {
-    width: 50,
-    height: 50,
-    borderRadius: 4,
-    marginRight: 16,
-  },
-  itemDetails: {
+  taskTitle: {
     flex: 1,
-  },
-  title: {
     fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
-  },
-  description: {
-    fontSize: 14,
-    color: '#b3b3b3',
-  },
-  bottomNavigation: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 70,
-    borderTopWidth: 1,
-    borderTopColor: '#282828',
-  },
-  bottomNavItem: {
-    alignItems: 'center',
-  },
-  bottomNavText: {
-    color: 'white',
-    marginTop: 5,
+    marginRight: 12,
   },
 });
 
