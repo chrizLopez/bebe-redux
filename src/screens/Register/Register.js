@@ -1,7 +1,7 @@
 // Register.js
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { registerUser } from "c:/Users/STEPHIE/mobapp/Mobile1/src/screens/redux/store";
+import { registerUser } from "../redux/store"
 import { View, Text, StyleSheet, Image, useWindowDimensions } from "react-native";
 import Input from "../../components/Inputs/Input";
 import Button from "../../components/Buttons/Button";
@@ -19,7 +19,7 @@ const Register = ({ dispatch }) => {
 
   useEffect(() => {
     // Dispatch registerUser only once when the component mounts
-    dispatch(registerUser(newUser));
+    // dispatch(registerUser(newUser));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onBackToLogin = () => {
@@ -30,13 +30,13 @@ const Register = ({ dispatch }) => {
     const { username, password, firstName, lastName, confirmPassword } = data;
     const newUser = { username, password, firstName, lastName };
 
-    try {
-      // Save user to AsyncStorage before dispatching the action
-      await AsyncStorage.setItem("registeredUsers", JSON.stringify([...registeredUsers, newUser]));
-      console.log("User registered and saved to AsyncStorage:", newUser);
-    } catch (error) {
-      console.error("Error saving registered user:", error);
-    }
+    // try {
+    //   // Save user to AsyncStorage before dispatching the action
+    //   await AsyncStorage.setItem("registeredUsers", JSON.stringify([...registeredUsers, newUser]));
+    //   console.log("User registered and saved to AsyncStorage:", newUser);
+    // } catch (error) {
+    //   console.error("Error saving registered user:", error);
+    // }
 
     // Dispatch the registerUser action
     dispatch(registerUser(newUser))
@@ -58,14 +58,49 @@ const Register = ({ dispatch }) => {
       />
 
       <Text style={styles.title}>Sign Up</Text>
+      
+      <Input
+        name="firstName"
+        placeholder="First Name"
+        control={control}
+        rules={{
+          required: "The First Name is required",
+        }}
+      />
 
-      {/* ... other components ... */}
+      <Input
+        name="lastName"
+        placeholder="Last Name"
+        control={control}
+        rules={{
+          required: "The Last Name is required",
+        }}
+      />
+
+      <Input
+        name="userName"
+        placeholder="Username"
+        control={control}
+        rules={{
+          required: "The Username is required",
+        }}
+      />
+
+      <Input
+        name="password"
+        placeholder="Password"
+        control={control}
+        rules={{
+          required: "The Password is required",
+        }}
+      />
 
       <Button
         text="Register"
         type="PRIMARY"
         onPress={handleSubmit(onRegisterPressed)}
       />
+
       <Text>
         <Text style={styles.word}>Already have an account?{" "}</Text>
         <Text style={styles.underlineText} onPress={onBackToLogin}>

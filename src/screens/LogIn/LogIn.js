@@ -1,7 +1,6 @@
 // Register.js
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { registerUser } from "c:/Users/STEPHIE/mobapp/Mobile1/src/screens/redux/store";
 import { View, Text, StyleSheet, Image, useWindowDimensions } from "react-native";
 import Input from "../../components/Inputs/Input";
 import Button from "../../components/Buttons/Button";
@@ -9,36 +8,24 @@ import Logo from "../../../assets/images/logo.jpg";
 import { useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { registerUser } from "../redux/actions";
+import store from "../redux/store";
 
-const Register = ({ dispatch, registeredUsers }) => {
+const Register = ({registeredUsers }) => {
   const { height } = useWindowDimensions();
   const navigation = useNavigation();
   const { control, handleSubmit, watch } = useForm();
 
-  const pass = watch("password");
-  const [newUser, setNewUser] = useState(null);
-
   useEffect(() => {
-    if (newUser) {
-      dispatch(registerUser(newUser));
-    }
-  }, [dispatch, newUser]);
+    console.log("registeredUsersregisteredUsers", registeredUsers)
+  }, [registeredUsers]);
 
-  const onBackToLogin = () => {
-    navigation.navigate("Login");
+  const gotoRegister = () => {
+    navigation.navigate("Register");
   };
 
-  const onRegisterPressed = async (data) => {
-    const { username, password, firstName, lastName, confirmPassword } = data;
-    const newUser = { username, password, firstName, lastName };
-    setNewUser(newUser);
-
-    try {
-      await AsyncStorage.setItem("registeredUsers", JSON.stringify([...registeredUsers, newUser]));
-      console.log("User registered and saved to AsyncStorage:", newUser);
-    } catch (error) {
-      console.error("Error saving registered user:", error);
-    }
+  const onLoginPressed = async (data) => {
+   store.dispatch(registerUser({data}))
   };
 
   return (
@@ -50,28 +37,35 @@ const Register = ({ dispatch, registeredUsers }) => {
       />
 
       <Text style={styles.title}>Sign Up</Text>
-
       <Input
-        name="firstName"
-        placeholder="First Name"
+        name="userName"
+        placeholder="Username"
         control={control}
         rules={{
-          required: "The First Name is required",
+          required: "The Username is required",
         }}
       />
 
-      {/* ... other input components ... */}
+      <Input
+        name="password"
+        secureTextEntry
+        placeholder="Password"
+        control={control}
+        rules={{
+          required: "The Password is required",
+        }}
+      />
 
       <Button
-        text="Register"
+        text="Login"
         type="PRIMARY"
-        onPress={handleSubmit(onRegisterPressed)}
+        onPress={handleSubmit(onLoginPressed)}
       />
 
       <Text>
-        <Text style={styles.word}>Already have an account?{" "}</Text>
-        <Text style={styles.underlineText} onPress={onBackToLogin}>
-          Log in here.
+        <Text style={styles.word}>Don't have an account?{" "}</Text>
+        <Text style={styles.underlineText} onPress={gotoRegister}>
+          Register here.
         </Text>
       </Text>
     </View>
@@ -117,4 +111,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connect((state) => ({ registeredUsers: state.registeredUsers }))(LogIn);
+export default connect((state) => ({ registeredUsers: state.registeredUsers }))(Register);
