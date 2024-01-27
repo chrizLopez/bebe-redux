@@ -1,21 +1,19 @@
 // Register.js
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { registerUser } from "../redux/store"
 import { View, Text, StyleSheet, Image, useWindowDimensions } from "react-native";
 import Input from "../../components/Inputs/Input";
 import Button from "../../components/Buttons/Button";
 import Logo from "../../../assets/images/logo.jpg";
 import { useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { registerUser } from "../redux/actions";
+import store from "../redux/store";
 
 const Register = ({ dispatch }) => {
   const { height } = useWindowDimensions();
   const navigation = useNavigation();
-  const { control, handleSubmit, watch } = useForm();
-
-  const pass = watch("password");
+  const { control, handleSubmit, reset } = useForm();
 
   useEffect(() => {
     // Dispatch registerUser only once when the component mounts
@@ -27,26 +25,13 @@ const Register = ({ dispatch }) => {
   };
 
   const onRegisterPressed = async (data) => {
-    const { username, password, firstName, lastName, confirmPassword } = data;
-    const newUser = { username, password, firstName, lastName };
-
-    // try {
-    //   // Save user to AsyncStorage before dispatching the action
-    //   await AsyncStorage.setItem("registeredUsers", JSON.stringify([...registeredUsers, newUser]));
-    //   console.log("User registered and saved to AsyncStorage:", newUser);
-    // } catch (error) {
-    //   console.error("Error saving registered user:", error);
-    // }
-
+    const { username, password, firstName, lastName } = data;
     // Dispatch the registerUser action
-    dispatch(registerUser(newUser))
-      .then(() => {
-        // If the registration is successful, navigate to the Login screen
-        navigation.navigate("Login");
-      })
-      .catch((error) => {
-        console.error("Error registering user:", error);
-      });
+    store.dispatch(registerUser({ username, password, firstName, lastName }));
+    //  show alert notification on save success
+    alert('Registered successfully');
+    //  clear form contents
+    reset();
   };
 
   return (
@@ -78,7 +63,7 @@ const Register = ({ dispatch }) => {
       />
 
       <Input
-        name="userName"
+        name="username"
         placeholder="Username"
         control={control}
         rules={{
